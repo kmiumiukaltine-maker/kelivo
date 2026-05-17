@@ -46,6 +46,8 @@
 	<true/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>澄会在想你的时候主动给你发消息 / 澄 will send you messages when he misses you.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

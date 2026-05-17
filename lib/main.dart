@@ -45,6 +45,7 @@ import 'dart:io'
     show Platform; // kept for global override usage inside provider
 import 'core/services/android_background.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/proactive_message_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final RouteObserver<ModalRoute<dynamic>> routeObserver =
@@ -243,6 +244,27 @@ class MyApp extends StatelessWidget {
                   if (isDesktop) {
                     await context.read<HotkeyProvider>().initialize();
                   }
+                } catch (_) {}
+              });
+
+              // Start proactive message SSE service
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                try {
+                  final sp = context.read<SettingsProvider>();
+                  ProactiveMessageService.instance.configure(
+                    serverUrl: sp.proactiveServerUrl,
+                    enabled: sp.proactiveEnabled,
+                  );
+                  await ProactiveMessageService.instance.start();
+                  // Re-configure when settings change
+                  sp.addListener(() {
+                    ProactiveMessageService.instance.stop();
+                    ProactiveMessageService.instance.configure(
+                      serverUrl: sp.proactiveServerUrl,
+                      enabled: sp.proactiveEnabled,
+                    );
+                    ProactiveMessageService.instance.start();
+                  });
                 } catch (_) {}
               });
 

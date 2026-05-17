@@ -27,6 +27,10 @@ class ProactiveMessageService {
   // Optional in-app callback.
   void Function(String content, String time)? onMessage;
 
+  // Dedup: track recent content to avoid inserting duplicates from multiple SSE connections.
+  final Map<String, DateTime> _recentContents = {};
+  static const _dedupWindow = Duration(seconds: 10);
+
   void configure({
     required String serverUrl,
     required bool enabled,
@@ -112,7 +116,16 @@ class ProactiveMessageService {
     } catch (_) {}
   }
 
+  bool _isDuplicate(String content) {
+    final now = DateTime.now();
+    _recentContents.removeWhere((_, t) => now.difference(t) > _dedupWindow);
+    if (_recentContents.containsKey(content)) return true;
+    _recentContents[content] = now;
+    return false;
+  }
+
   Future<void> _insertAndNotify(String content, String time) async {
+    if (_isDuplicate(content)) return;
     final svc = _chatService;
     final name = _assistantName;
     final resolve = _resolveAssistantId;

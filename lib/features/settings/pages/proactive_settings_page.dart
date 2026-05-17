@@ -53,7 +53,7 @@ class _ProactiveSettingsPageState extends State<ProactiveSettingsPage> {
         : Colors.white.withValues(alpha: 0.96);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('澄的主动消息')),
+      appBar: AppBar(title: const Text('主动消息推送')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -80,7 +80,7 @@ class _ProactiveSettingsPageState extends State<ProactiveSettingsPage> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          '澄想你的时候会主动发消息',
+                          'AI 主动向你发送消息',
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],

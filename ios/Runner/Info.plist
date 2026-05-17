@@ -47,7 +47,7 @@
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>NSUserNotificationUsageDescription</key>
-	<string>澄会在想你的时候主动给你发消息 / 澄 will send you messages when he misses you.</string>
+	<string>用于接收 AI 主动发送的消息通知 / Used to receive proactive messages from your AI.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

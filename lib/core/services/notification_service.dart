@@ -15,8 +15,8 @@ class NotificationService {
   static const AndroidNotificationChannel _proactiveChannel =
       AndroidNotificationChannel(
         'kelivo_proactive_v1',
-        '澄的消息',
-        description: '澄主动发送的消息',
+        'AI 主动消息',
+        description: 'AI 主动发送的消息',
         importance: Importance.high,
         playSound: true,
       );
@@ -128,7 +128,7 @@ class NotificationService {
     );
     await _plugin.show(
       3001,
-      '✦ 澄找你',
+      '✦ 新消息',
       content,
       NotificationDetails(android: androidDetails, iOS: iosDetails),
     );

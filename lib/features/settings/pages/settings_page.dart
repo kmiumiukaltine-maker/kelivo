@@ -298,7 +298,7 @@ class SettingsPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          header('澄'),
+          header('推送'),
           _iosSectionCard(
             children: [
               _iosNavRow(

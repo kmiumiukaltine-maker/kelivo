@@ -19,6 +19,7 @@ import '../../instruction_injection/pages/instruction_injection_page.dart';
 import '../../world_book/pages/world_book_page.dart';
 import 'network_proxy_page.dart';
 import 'storage_space_page.dart';
+import 'proactive_settings_page.dart';
 import '../../stats/pages/stats_page.dart';
 import '../../../core/services/storage/storage_usage_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -290,6 +291,26 @@ class SettingsPage extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const NetworkProxyPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          header('澄'),
+          _iosSectionCard(
+            children: [
+              _iosNavRow(
+                context,
+                icon: Lucide.Bell,
+                label: '主动消息',
+                detailText: settings.proactiveEnabled ? '开启' : '关闭',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ProactiveSettingsPage(),
+                    ),
                   );
                 },
               ),

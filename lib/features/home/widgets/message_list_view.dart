@@ -617,6 +617,10 @@ class MessageListView extends StatelessWidget {
           message,
           canDeleteAllVersions: total > 1,
         );
+        // Wait for the sheet's dismiss animation to fully settle before
+        // showing another modal (dialog). On iOS the residual touch-up event
+        // can instantly dismiss a dialog that opens too quickly after a sheet pop.
+        await Future.delayed(const Duration(milliseconds: 150));
         if (action == MessageMoreAction.deleteCurrentVersion) {
           await onDeleteMessage?.call(message, byGroup);
         } else if (action == MessageMoreAction.deleteAllVersions) {

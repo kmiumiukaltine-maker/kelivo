@@ -303,7 +303,7 @@ class SettingsPage extends StatelessWidget {
             children: [
               _iosNavRow(
                 context,
-                icon: Lucide.Bell,
+                icon: Lucide.MessageCircle,
                 label: '主动消息',
                 detailText: settings.proactiveEnabled ? '开启' : '关闭',
                 onTap: () {

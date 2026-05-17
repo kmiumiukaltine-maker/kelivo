@@ -180,7 +180,7 @@ class MarkdownWithCodeHighlight extends StatelessWidget {
       onLinkTap: (url, title) => _handleLinkTap(context, url),
       components: components,
       inlineComponents: inlineComponents,
-      imageBuilder: (ctx, url) {
+      imageBuilder: (ctx, url, [width, height]) {
         final imgs = imageUrls.isNotEmpty ? imageUrls : <String>[url];
         final idx = imgs.indexOf(url);
         final initial = idx >= 0 ? idx : 0;

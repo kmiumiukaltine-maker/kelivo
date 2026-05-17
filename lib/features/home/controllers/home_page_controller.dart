@@ -17,6 +17,7 @@ import '../../../core/providers/instruction_injection_provider.dart';
 import '../../../core/providers/memory_provider.dart';
 import '../../../core/services/chat/chat_service.dart';
 import '../../../core/services/haptics.dart';
+import '../../../core/services/proactive_message_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/snackbar.dart';
 import '../../../utils/platform_utils.dart';
@@ -111,6 +112,7 @@ class HomePageController extends ChangeNotifier {
 
   McpProvider? _mcpProvider;
   StreamSubscription<ChatAction>? _chatActionSub;
+  StreamSubscription<String>? _proactiveSub;
 
   // ============================================================================
   // Animation Controllers
@@ -264,6 +266,36 @@ class HomePageController extends ChangeNotifier {
     _initializeProviders();
     _setupKeyboardListeners();
     _setupDesktopFeatures();
+    _bindProactiveService();
+  }
+
+  void _bindProactiveService() {
+    try {
+      final settings = _context.read<SettingsProvider>();
+      final assistantProvider = _context.read<AssistantProvider>();
+      ProactiveMessageService.instance.configure(
+        serverUrl: settings.proactiveServerUrl,
+        enabled: settings.proactiveEnabled,
+        assistantName: settings.proactiveAssistantName,
+        chatService: _chatService,
+        resolveAssistantId: (name) {
+          try {
+            return assistantProvider.assistants
+                .firstWhere((a) => a.name == name)
+                .id;
+          } catch (_) {
+            return null;
+          }
+        },
+      );
+      _proactiveSub = ProactiveMessageService.instance.insertedStream
+          .listen((conversationId) {
+        if (_chatController.currentConversation?.id == conversationId) {
+          _chatController.reloadCurrentMessages();
+        }
+        notifyListeners();
+      });
+    } catch (_) {}
   }
 
   void _initializeAnimations() {
@@ -1665,6 +1697,9 @@ class HomePageController extends ChangeNotifier {
     _scrollCtrl.dispose();
     try {
       _chatActionSub?.cancel();
+    } catch (_) {}
+    try {
+      _proactiveSub?.cancel();
     } catch (_) {}
     _chatController.dispose();
     _streamController.dispose();

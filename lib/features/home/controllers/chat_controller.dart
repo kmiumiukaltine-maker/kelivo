@@ -106,6 +106,17 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Re-read messages for the current conversation from the service.
+  void reloadCurrentMessages() {
+    final conv = _currentConversation;
+    if (conv == null) return;
+    _messages = List.of(_chatService.getMessages(conv.id));
+    _collapsedCache = null;
+    _collapsedIdToIndex = null;
+    _groupCache = null;
+    notifyListeners();
+  }
+
   /// Create a new conversation and set it as current.
   Future<Conversation> createNewConversation({
     required String title,

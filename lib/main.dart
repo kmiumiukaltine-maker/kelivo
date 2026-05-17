@@ -254,6 +254,7 @@ class MyApp extends StatelessWidget {
                   ProactiveMessageService.instance.configure(
                     serverUrl: sp.proactiveServerUrl,
                     enabled: sp.proactiveEnabled,
+                    assistantName: sp.proactiveAssistantName,
                   );
                   await ProactiveMessageService.instance.start();
                   // Re-configure when settings change
@@ -262,6 +263,7 @@ class MyApp extends StatelessWidget {
                     ProactiveMessageService.instance.configure(
                       serverUrl: sp.proactiveServerUrl,
                       enabled: sp.proactiveEnabled,
+                      assistantName: sp.proactiveAssistantName,
                     );
                     ProactiveMessageService.instance.start();
                   });

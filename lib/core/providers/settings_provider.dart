@@ -219,6 +219,7 @@ class SettingsProvider extends ChangeNotifier {
   // Proactive message push server
   static const String _proactiveServerUrlKey = 'proactive_server_url_v1';
   static const String _proactiveEnabledKey = 'proactive_enabled_v1';
+  static const String _proactiveAssistantNameKey = 'proactive_assistant_name_v1';
   // Fonts
   static const String _displayAppFontFamilyKey = 'display_app_font_family_v1';
   static const String _displayCodeFontFamilyKey = 'display_code_font_family_v1';
@@ -989,6 +990,7 @@ class SettingsProvider extends ChangeNotifier {
     // Proactive push server
     _proactiveServerUrl = prefs.getString(_proactiveServerUrlKey) ?? '';
     _proactiveEnabled = prefs.getBool(_proactiveEnabledKey) ?? false;
+    _proactiveAssistantName = prefs.getString(_proactiveAssistantNameKey) ?? '';
 
     // Android background chat mode (Android only; default ON on first run)
     try {
@@ -2041,8 +2043,10 @@ class SettingsProvider extends ChangeNotifier {
   // ===== Proactive message push server =====
   String _proactiveServerUrl = '';
   bool _proactiveEnabled = false;
+  String _proactiveAssistantName = '';
   String get proactiveServerUrl => _proactiveServerUrl;
   bool get proactiveEnabled => _proactiveEnabled;
+  String get proactiveAssistantName => _proactiveAssistantName;
 
   Future<void> setProactiveServerUrl(String v) async {
     _proactiveServerUrl = v.trim();
@@ -2056,6 +2060,13 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_proactiveEnabledKey, _proactiveEnabled);
+  }
+
+  Future<void> setProactiveAssistantName(String v) async {
+    _proactiveAssistantName = v.trim();
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_proactiveAssistantNameKey, _proactiveAssistantName);
   }
 
   // ===== Android background chat generation =====

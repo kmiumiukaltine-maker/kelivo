@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../services/chat/chat_service.dart';
 import 'notification_service.dart';
 
-/// SSE-based proactive message service.
-/// Connects to /push-api/events on the configured server and shows
-/// local notifications when API澄 decides to send a proactive message.
 class ProactiveMessageService {
   static final ProactiveMessageService _instance =
       ProactiveMessageService._();
@@ -15,16 +12,33 @@ class ProactiveMessageService {
 
   String? _serverUrl;
   bool _enabled = false;
+  String? _assistantName;
+  ChatService? _chatService;
+  String? Function(String name)? _resolveAssistantId;
+
   StreamSubscription<String>? _sub;
   Timer? _reconnectTimer;
   bool _running = false;
 
-  // Callback for in-app display (optional)
+  // Emits conversationId whenever a proactive message is inserted into the DB.
+  final _insertedController = StreamController<String>.broadcast();
+  Stream<String> get insertedStream => _insertedController.stream;
+
+  // Optional in-app callback.
   void Function(String content, String time)? onMessage;
 
-  void configure({required String serverUrl, required bool enabled}) {
+  void configure({
+    required String serverUrl,
+    required bool enabled,
+    String? assistantName,
+    ChatService? chatService,
+    String? Function(String name)? resolveAssistantId,
+  }) {
     _serverUrl = serverUrl.trim().replaceAll(RegExp(r'/+$'), '');
     _enabled = enabled;
+    if (assistantName != null) _assistantName = assistantName.trim();
+    if (chatService != null) _chatService = chatService;
+    if (resolveAssistantId != null) _resolveAssistantId = resolveAssistantId;
   }
 
   Future<void> start() async {
@@ -77,13 +91,10 @@ class ProactiveMessageService {
     });
   }
 
-  String _buf = '';
-
   void _onLine(String line) {
     if (line.startsWith('data:')) {
-      _buf = line.substring(5).trim();
-      _handleData(_buf);
-      _buf = '';
+      final data = line.substring(5).trim();
+      _handleData(data);
     }
   }
 
@@ -95,11 +106,45 @@ class ProactiveMessageService {
         final content = (map['content'] as String?) ?? '';
         final time = (map['time'] as String?) ?? '';
         if (content.isNotEmpty) {
-          NotificationService.showProactive(content: content);
-          onMessage?.call(content, time);
+          _insertAndNotify(content, time);
         }
       }
     } catch (_) {}
+  }
+
+  Future<void> _insertAndNotify(String content, String time) async {
+    final svc = _chatService;
+    final name = _assistantName;
+    final resolve = _resolveAssistantId;
+
+    String? conversationId;
+
+    if (svc != null && name != null && name.isNotEmpty && resolve != null) {
+      final assistantId = resolve(name);
+      if (assistantId != null) {
+        // Find most recent conversation for this assistant, or create one.
+        final convos = svc.getAllConversations()
+            .where((c) => c.assistantId == assistantId)
+            .toList()
+          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+        final convo = convos.isNotEmpty
+            ? convos.first
+            : await svc.createConversation(assistantId: assistantId);
+
+        await svc.addMessage(
+          conversationId: convo.id,
+          role: 'assistant',
+          content: content,
+        );
+
+        conversationId = convo.id;
+        _insertedController.add(conversationId);
+      }
+    }
+
+    NotificationService.showProactive(content: content);
+    onMessage?.call(content, time);
   }
 
   void _scheduleReconnect() {

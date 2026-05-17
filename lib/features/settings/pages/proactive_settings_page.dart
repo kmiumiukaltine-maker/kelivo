@@ -13,27 +13,32 @@ class ProactiveSettingsPage extends StatefulWidget {
 
 class _ProactiveSettingsPageState extends State<ProactiveSettingsPage> {
   late TextEditingController _urlController;
+  late TextEditingController _nameController;
 
   @override
   void initState() {
     super.initState();
     final settings = context.read<SettingsProvider>();
     _urlController = TextEditingController(text: settings.proactiveServerUrl);
+    _nameController = TextEditingController(text: settings.proactiveAssistantName);
   }
 
   @override
   void dispose() {
     _urlController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     final settings = context.read<SettingsProvider>();
     await settings.setProactiveServerUrl(_urlController.text);
+    await settings.setProactiveAssistantName(_nameController.text);
     ProactiveMessageService.instance.stop();
     ProactiveMessageService.instance.configure(
       serverUrl: settings.proactiveServerUrl,
       enabled: settings.proactiveEnabled,
+      assistantName: settings.proactiveAssistantName,
     );
     await ProactiveMessageService.instance.start();
     if (mounted) {
@@ -147,6 +152,41 @@ class _ProactiveSettingsPageState extends State<ProactiveSettingsPage> {
                 const SizedBox(height: 8),
                 Text(
                   '填入服务器地址，不需要加 /push-api/events',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: cs.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '指定助手',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: cs.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: '助手名称，例如：澄',
+                    hintStyle: TextStyle(
+                      color: cs.onSurface.withValues(alpha: 0.3),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: cs.outlineVariant),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                  ),
+                  autocorrect: false,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '收到消息后，将插入该助手的对话记录',
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onSurface.withValues(alpha: 0.4),

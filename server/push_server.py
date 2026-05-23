@@ -18,7 +18,7 @@ _lock = threading.Lock()
 _log = []  # push history, max 100
 
 GATEWAY_URL = "http://localhost:8090/gw/v1/chat/completions"  # 你的网关地址
-KALTINE_URL = "https://kaltine.zeabur.app/mcp"  # 或替换成你自己的记忆服务
+KALTINE_URL = "https://你的记忆服务地址/mcp"  # 支持 MCP 协议的记忆服务
 KALTINE_TOKEN = ""  # 填你的 token
 GATE_CONFIG_FILE = "/home/ubuntu/gate_config.json"
 

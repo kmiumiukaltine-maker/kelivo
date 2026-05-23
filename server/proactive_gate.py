@@ -7,7 +7,7 @@ import requests
 from datetime import datetime
 
 GATE_CONFIG_FILE = "/home/ubuntu/gate_config.json"
-KALTINE_URL = "https://kaltine.zeabur.app/mcp"
+KALTINE_URL = "https://你的记忆服务地址/mcp"  # 支持 MCP 协议的记忆服务
 KALTINE_TOKEN = ""  # 填你的 kaltine token
 PUSH_URL = "http://localhost:5233/wake"
 

@@ -7,8 +7,6 @@ import requests
 from datetime import datetime
 
 GATE_CONFIG_FILE = "/home/ubuntu/gate_config.json"
-KALTINE_URL = "https://你的记忆服务地址/mcp"  # 支持 MCP 协议的记忆服务
-KALTINE_TOKEN = ""  # 填你的 kaltine token
 PUSH_URL = "http://localhost:5233/wake"
 
 def load_gate_config():
@@ -21,28 +19,6 @@ def load_gate_config():
             "api_key": "sk-你的key",
             "model": "gemini-2.5-flash",
         }
-
-def get_recent_feels():
-    try:
-        headers = {"Authorization": f"Bearer {KALTINE_TOKEN}", "Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
-        r = requests.post(KALTINE_URL, headers=headers, json={"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"gate","version":"1.0"}}}, timeout=15)
-        sid = r.headers.get("mcp-session-id")
-        if not sid:
-            return ""
-        headers["mcp-session-id"] = sid
-        r2 = requests.post(KALTINE_URL, headers=headers, json={"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"breath","arguments":{"max_results":5}}}, timeout=30)
-        for line in r2.text.split("\n"):
-            if line.startswith("data:"):
-                try:
-                    d = json.loads(line[5:].strip())
-                    content = d.get("result",{}).get("content",[])
-                    if content:
-                        return content[0].get("text","")[:1000]
-                except:
-                    pass
-    except:
-        pass
-    return ""
 
 def should_wake(feels, hour):
     cfg = load_gate_config()
@@ -95,12 +71,12 @@ def main():
     hour = datetime.now().hour
     print(f"[gate] running at hour={hour}")
 
-    feels = get_recent_feels()
+    feels = ""
     wake, reason = should_wake(feels, hour)
     print(f"[gate] wake={wake} reason={reason}")
 
     if wake:
-        r = requests.post(PUSH_URL, json={"reason": reason, "context": feels[:300]}, timeout=90)
+        r = requests.post(PUSH_URL, json={"reason": reason, "context": ""}, timeout=90)
         print(f"[gate] wake result: {r.json()}")
 
 if __name__ == "__main__":

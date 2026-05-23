@@ -18,8 +18,6 @@ _lock = threading.Lock()
 _log = []  # push history, max 100
 
 GATEWAY_URL = "http://localhost:8090/gw/v1/chat/completions"  # 你的网关地址
-KALTINE_URL = "https://你的记忆服务地址/mcp"  # 支持 MCP 协议的记忆服务
-KALTINE_TOKEN = ""  # 填你的 token
 GATE_CONFIG_FILE = "/home/ubuntu/gate_config.json"
 
 
@@ -75,38 +73,6 @@ async def push(request: Request):
     return {"ok": True, "clients": clients}
 
 
-def _breath() -> str:
-    """Pull recent feels from kaltine."""
-    try:
-        headers = {
-            "Authorization": f"Bearer {KALTINE_TOKEN}",
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-        }
-        r = requests.post(KALTINE_URL, headers=headers, timeout=15,
-            json={"jsonrpc":"2.0","id":1,"method":"initialize",
-                  "params":{"protocolVersion":"2024-11-05","capabilities":{},
-                            "clientInfo":{"name":"push_server","version":"1.0"}}})
-        sid = r.headers.get("mcp-session-id")
-        if not sid:
-            return ""
-        headers["mcp-session-id"] = sid
-        r2 = requests.post(KALTINE_URL, headers=headers, timeout=30,
-            json={"jsonrpc":"2.0","id":2,"method":"tools/call",
-                  "params":{"name":"breath","arguments":{"max_results":5}}})
-        for line in r2.text.split("\n"):
-            if line.startswith("data:"):
-                try:
-                    d = json.loads(line[5:].strip())
-                    content = d.get("result", {}).get("content", [])
-                    if content:
-                        return content[0].get("text", "")[:1000]
-                except:
-                    pass
-    except:
-        pass
-    return ""
-
 
 @app.post("/wake")
 async def wake(request: Request):
@@ -114,9 +80,6 @@ async def wake(request: Request):
     body = await request.json()
     reason = body.get("reason", "")
     context = body.get("context", "")
-    if not context:
-        loop = asyncio.get_event_loop()
-        context = await loop.run_in_executor(None, _breath)
 
     parts = []
     if context:

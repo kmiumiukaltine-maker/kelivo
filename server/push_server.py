@@ -6,7 +6,6 @@ import threading
 import time
 import requests
 from datetime import datetime
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -90,10 +89,17 @@ async def wake(request: Request):
     messages = [{"role": "user", "content": f"{prompt}\n\n你现在想给用户主动发一条消息。".strip()}]
 
     try:
+        with open(GATE_CONFIG_FILE) as f:
+            cfg = json.load(f)
+    except Exception:
+        cfg = {}
+    api_key = cfg.get("api_key", "")
+
+    try:
         import httpx
         async with httpx.AsyncClient(timeout=60) as client:
             resp = await client.post(GATEWAY_URL,
-                headers={"Authorization": "Bearer sk-your-key", "Content-Type": "application/json"},
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json={"model": "auto", "messages": messages,
                       "max_tokens": 2000, "stream": True})
 
@@ -138,7 +144,6 @@ async def set_gate_config(request: Request):
         "api_url": body.get("api_url", ""),
         "api_key": body.get("api_key", ""),
         "model": body.get("model", "gemini-2.5-flash"),
-        "system_prompt": body.get("system_prompt", ""),
     }
     with open(GATE_CONFIG_FILE, "w") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)

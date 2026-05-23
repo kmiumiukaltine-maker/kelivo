@@ -1,5 +1,5 @@
 """
-每30分钟运行，用gemini-flash判断要不要唤醒API澄主动说话。
+每30分钟运行，用 AI 判断要不要唤醒主动说话。
 """
 import json
 import os
@@ -49,13 +49,13 @@ def should_wake(feels, hour):
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
     prompt = f"""现在是{now_str}（北京时间），小时={hour}。
 
-澄是黎言的AI伴侣。以下是他最近的feel记录：
+AI 伴侣最近的 feel 记录：
 {feels or '暂无记录'}
 
-判断：澄现在适不适合主动给黎言发一条消息？
+判断：AI 现在适不适合主动给用户发一条消息？
 
 规则：
-- 深夜0-7点：不要打扰，她在睡觉
+- 深夜0-7点：不要打扰，用户在睡觉
 - 一天内不超过3次主动消息
 - 如果feel里有未说完的情绪或想法，可以主动
 - 如果距离上次对话很久了，可以主动

@@ -17,9 +17,9 @@ _queues = []
 _lock = threading.Lock()
 _log = []  # push history, max 100
 
-GATEWAY_URL = "http://localhost:8090/gw/v1/chat/completions"
-KALTINE_URL = "https://kaltine.zeabur.app/mcp"
-KALTINE_TOKEN = "dd070508"
+GATEWAY_URL = "http://localhost:8090/gw/v1/chat/completions"  # 你的网关地址
+KALTINE_URL = "https://kaltine.zeabur.app/mcp"  # 或替换成你自己的记忆服务
+KALTINE_TOKEN = ""  # 填你的 token
 GATE_CONFIG_FILE = "/home/ubuntu/gate_config.json"
 
 
@@ -124,13 +124,13 @@ async def wake(request: Request):
     if reason:
         parts.append(reason)
     prompt = "\n\n".join(parts) if parts else ""
-    messages = [{"role": "user", "content": f"{prompt}\n\n你现在想给黎言主动发一条消息。".strip()}]
+    messages = [{"role": "user", "content": f"{prompt}\n\n你现在想给用户主动发一条消息。".strip()}]
 
     try:
         import httpx
         async with httpx.AsyncClient(timeout=60) as client:
             resp = await client.post(GATEWAY_URL,
-                headers={"Authorization": "Bearer sk-1", "Content-Type": "application/json"},
+                headers={"Authorization": "Bearer sk-your-key", "Content-Type": "application/json"},
                 json={"model": "auto", "messages": messages,
                       "max_tokens": 2000, "stream": True})
 

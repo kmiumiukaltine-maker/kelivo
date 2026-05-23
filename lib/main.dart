@@ -251,10 +251,22 @@ class MyApp extends StatelessWidget {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 try {
                   final sp = context.read<SettingsProvider>();
+                  final chatSvc = context.read<ChatService>();
+                  final assistantProv = context.read<AssistantProvider>();
                   ProactiveMessageService.instance.configure(
                     serverUrl: sp.proactiveServerUrl,
                     enabled: sp.proactiveEnabled,
                     assistantName: sp.proactiveAssistantName,
+                    chatService: chatSvc,
+                    resolveAssistantId: (name) {
+                      try {
+                        return assistantProv.assistants
+                            .firstWhere((a) => a.name.trim() == name.trim())
+                            .id;
+                      } catch (_) {
+                        return null;
+                      }
+                    },
                   );
                   await ProactiveMessageService.instance.start();
                   // Re-configure when settings change
@@ -264,6 +276,16 @@ class MyApp extends StatelessWidget {
                       serverUrl: sp.proactiveServerUrl,
                       enabled: sp.proactiveEnabled,
                       assistantName: sp.proactiveAssistantName,
+                      chatService: chatSvc,
+                      resolveAssistantId: (name) {
+                        try {
+                          return assistantProv.assistants
+                              .firstWhere((a) => a.name.trim() == name.trim())
+                              .id;
+                        } catch (_) {
+                          return null;
+                        }
+                      },
                     );
                     ProactiveMessageService.instance.start();
                   });

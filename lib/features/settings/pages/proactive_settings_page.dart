@@ -169,7 +169,7 @@ class _ProactiveSettingsPageState extends State<ProactiveSettingsPage> {
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    hintText: '助手名称，例如：澄',
+                    hintText: '助手名称，例如：Claude',
                     hintStyle: TextStyle(
                       color: cs.onSurface.withValues(alpha: 0.3),
                     ),
